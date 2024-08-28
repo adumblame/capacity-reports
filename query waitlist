@@ -1,0 +1,43 @@
+/**
+ * Returns the count of enrolled participants based on session name, and either or both of grade and program name, and gender.
+ * Includes a trigger parameter to allow for automatic updates on sheet changes.
+ *
+ * @param {string} sessionName The name of the session (e.g., "Silver Spring Week 3").
+ * @param {string} searchParam Either the grade of the participants (e.g., "3rd") or the name of the program (e.g., "Adventure Camp"). Pass an empty string for this parameter if you wish to search solely by the other parameter.
+ * @param {string} gender The gender of the participants (e.g., "Male").
+ * @param {string} paramType Specifies the type of the second parameter ('GRADE' or 'PROGRAM'). If 'GRADE', searchParam is treated as a grade. If 'PROGRAM', searchParam is treated as a program name.
+ * @param {string} triggerCell A cell value that changes on edit, used to trigger recalculation. This parameter does not affect the query logic.
+ * @customfunction
+ */
+function QUERY_WAITLIST_FLEXIBLE(sessionName, searchParam, gender, paramType, triggerCell) {
+  // Replace 'Sheet1' with the actual name of your sheet containing the data
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('maybe data reports');
+  var data = sheet.getDataRange().getValues();
+  var count = 0;
+  
+  // Loop through the data, assuming the first row contains headers
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    var matchesSession = (row[0] == sessionName);
+    var matchesGender = (row[4] == gender);
+    var matchesStatus = (row[2] == "WAITLIST");
+    var matchesSearchParam = false;
+    
+    // Check if the search parameter matches, based on the paramType
+    if (paramType == 'GRADE') {
+      matchesSearchParam = (row[5] == searchParam);
+    } else if (paramType == 'PROGRAM') {
+      matchesSearchParam = (row[1] == searchParam);
+    }
+    
+    // Count if all conditions are met
+    if (matchesSession && matchesGender && matchesStatus && (matchesSearchParam || searchParam == "")) {
+      count++;
+    }
+  }
+  
+  return count;
+}
+/** Sample scripts for discovery (where we sort by grade within the program) : =QUERY_ENROLLMENT_FLEXIBLE("Silver Spring Week 3", "Pre-K", "Male", "GRADE", 'maybe data reports'!Z1) grade must be all caps
+ * Sample Scripts for explorer (where we do not sort by grade within the program): =QUERY_ENROLLMENT_FLEXIBLE("Silver Spring Week 3", "Explorer Camp", "Female", "PROGRAM", 'maybe data reports'!Z1) program must be all caps
+*/
