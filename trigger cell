@@ -1,0 +1,5 @@
+function onEdit(e) {
+  // Sets the current timestamp to cell Z1 whenever any cell is edited
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  sheet.getRange('Z1').setValue(new Date().toTimeString());
+}
